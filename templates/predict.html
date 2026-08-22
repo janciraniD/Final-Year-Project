@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block title %}AI Skin Disease Prediction – HealthChain AI{% endblock %}
+{% block content %}
+<h4 class="fw-bold mb-4">
+  <i class="fas fa-microscope me-2 text-success"></i>AI Skin Disease Prediction
+  <small class="text-muted fs-6 ms-2">(EfficientNetB0 Deep Learning)</small>
+</h4>
+
+<div class="row g-4">
+  <!-- Upload Card -->
+  <div class="col-md-5">
+    <div class="card p-4">
+      <h6 class="fw-bold mb-3">Upload Skin Image</h6>
+      <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label class="form-label">Select Image *</label>
+          <input type="file" name="skin_image" class="form-control"
+                 accept=".jpg,.jpeg,.png" required onchange="previewImg(this)"/>
+          <small class="text-muted">JPEG / PNG, max 16MB</small>
+        </div>
+        <div id="preview-box" class="mb-3 d-none text-center">
+          <img id="img-preview" src="" class="img-fluid rounded shadow-sm"
+               style="max-height:200px; border:2px solid #dee2e6"/>
+        </div>
+        <button class="btn btn-success btn-lg w-100">
+          <i class="fas fa-brain me-2"></i>Predict Disease
+        </button>
+      </form>
+    </div>
+
+    <!-- Detectable diseases -->
+    <div class="card mt-3 p-3" style="background:#0a1628;color:white">
+      <h6 class="text-info fw-bold mb-2">
+        <i class="fas fa-list me-2"></i>Detectable Conditions
+      </h6>
+      {% for d, info in [
+          ('Actinic Keratosis','warning'),
+          ('Atopic Dermatitis','info'),
+          ('Squamous Cell Carcinoma','danger'),
+          ('Basal Cell Carcinoma','danger'),
+          ('Melanoma','danger'),
+          ('Benign Keratosis','success'),
+          ('Healthy Skin','success')
+      ] %}
+      <span class="badge bg-{{ info }} me-1 mb-1 text-start">{{ d }}</span>
+      {% endfor %}
+    </div>
+
+    <!-- How it works -->
+    <div class="card mt-3 p-3">
+      <h6 class="fw-bold mb-2"><i class="fas fa-cogs me-2 text-secondary"></i>How It Works</h6>
+      <ol class="small text-muted mb-0 ps-3">
+        <li>Upload a clear skin photo</li>
+        <li>AI analyzes color, texture &amp; patterns</li>
+        <li>EfficientNetB0 classifies the condition</li>
+        <li>Result stored on Blockchain for audit</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Result Card -->
+  <div class="col-md-7">
+    {% if prediction %}
+    <div class="card p-4">
+      <h6 class="fw-bold text-success mb-3">
+        <i class="fas fa-check-circle me-2"></i>Prediction Result
+      </h6>
+
+      <!-- Main result banner -->
+      {% set col = result.color if result and result.color else ('success' if prediction == 'Healthy Skin' else 'warning') %}
+      <div class="alert alert-{{ col }} text-center py-4 mb-3">
+        <h2 class="fw-bold mb-1">{{ prediction }}</h2>
+        <h4 class="mb-0">{{ "%.1f"|format(confidence * 100) }}% Confidence</h4>
+        {% if result and result.mode %}
+        <small class="opacity-75">Mode: {{ result.mode }}</small>
+        {% endif %}
+      </div>
+
+      <!-- Uploaded image -->
+      {% if image_path %}
+      <div class="text-center mb-3">
+        <img src="{{ url_for('static', filename=image_path) }}"
+             class="img-fluid rounded shadow" style="max-height:200px"/>
+      </div>
+      {% endif %}
+
+      <!-- Confidence bar -->
+      <div class="mb-3">
+        <div class="d-flex justify-content-between small text-muted mb-1">
+          <span>Confidence</span><span>{{ "%.1f"|format(confidence*100) }}%</span>
+        </div>
+        <div class="progress" style="height:16px">
+          <div class="progress-bar bg-{{ col }} progress-bar-striped"
+               style="width:{{ confidence*100 }}%; transition: width 1s ease;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Severity + action -->
+      {% if result %}
+      <div class="row g-2 mb-3">
+        <div class="col-6">
+          <div class="card p-2 text-center bg-light">
+            <small class="text-muted">Severity</small>
+            <div class="fw-bold text-{{ col }}">{{ result.severity }}</div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="card p-2 text-center bg-light">
+            <small class="text-muted">Recommended Action</small>
+            <div class="fw-bold small">{{ result.action }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- All disease probabilities -->
+      {% if result.all_probs %}
+      <h6 class="fw-bold mb-2 mt-3">
+        <i class="fas fa-chart-bar me-1"></i>All Disease Probabilities
+      </h6>
+      {% for disease, prob in result.all_probs.items() %}
+      <div class="mb-2">
+        <div class="d-flex justify-content-between small mb-1">
+          <span class="{% if disease == prediction %}fw-bold text-{{ col }}{% else %}text-muted{% endif %}">
+            {{ disease }}{% if disease == prediction %} ✓{% endif %}
+          </span>
+          <span class="{% if disease == prediction %}fw-bold{% endif %}">
+            {{ "%.1f"|format(prob * 100) }}%
+          </span>
+        </div>
+        <div class="progress" style="height:8px">
+          <div class="progress-bar {% if disease == prediction %}bg-{{ col }}{% else %}bg-secondary opacity-50{% endif %}"
+               style="width:{{ prob * 100 }}%"></div>
+        </div>
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endif %}
+
+      <p class="text-muted small mt-3 mb-0">
+        <i class="fas fa-info-circle me-1"></i>
+        Result recorded on Ethereum Blockchain for audit trail.
+        <strong>This is not a substitute for professional medical diagnosis.</strong>
+      </p>
+    </div>
+
+    {% else %}
+    <!-- Empty state -->
+    <div class="card p-5 text-center text-muted">
+      <i class="fas fa-robot fa-4x mb-3 opacity-25 d-block" style="color:#6c757d"></i>
+      <h5>Upload a skin image to get AI-based disease prediction</h5>
+      <p class="small mb-0">
+        Powered by EfficientNetB0 deep learning — analyzes color, texture &amp; lesion patterns
+      </p>
+    </div>
+    {% endif %}
+
+    <!-- Model info -->
+    <div class="card mt-3 p-3">
+      <h6 class="fw-bold mb-2">
+        <i class="fas fa-microchip me-2 text-secondary"></i>Model Architecture
+      </h6>
+      <div class="row text-center g-0">
+        <div class="col-3 border-end">
+          <small class="text-muted d-block">Model</small>
+          <span class="fw-bold small">EfficientNetB0</span>
+        </div>
+        <div class="col-3 border-end">
+          <small class="text-muted d-block">Input</small>
+          <span class="fw-bold small">224×224</span>
+        </div>
+        <div class="col-3 border-end">
+          <small class="text-muted d-block">Classes</small>
+          <span class="fw-bold small">7 Diseases</span>
+        </div>
+        <div class="col-3">
+          <small class="text-muted d-block">Dataset</small>
+          <span class="fw-bold small">HAM10000</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function previewImg(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('img-preview').src = e.target.result;
+      document.getElementById('preview-box').classList.remove('d-none');
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+// Animate progress bars on load
+window.addEventListener('load', () => {
+  document.querySelectorAll('.progress-bar').forEach(bar => {
+    const w = bar.style.width;
+    bar.style.width = '0%';
+    setTimeout(() => { bar.style.width = w; }, 100);
+  });
+});
+</script>
+{% endblock %}

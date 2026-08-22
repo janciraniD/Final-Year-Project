@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}HealthChain AI{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    :root {
+      --primary: #0d6efd;
+      --dark:    #0a1628;
+      --accent:  #00d4ff;
+    }
+    body { background: #f0f4ff; font-family: 'Segoe UI', sans-serif; }
+    .navbar { background: var(--dark) !important; }
+    .navbar-brand { color: var(--accent) !important; font-weight: 700; font-size: 1.3rem; }
+    .nav-link { color: #cdd6f4 !important; }
+    .nav-link:hover { color: var(--accent) !important; }
+    .card { border: none; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,.08); }
+    .card-header { border-radius: 14px 14px 0 0 !important; font-weight: 600; }
+    .btn-primary { background: var(--primary); border: none; border-radius: 8px; }
+    .badge-blockchain { background: #1e3a5f; color: #00d4ff; font-size: .7rem;
+                        padding: 3px 8px; border-radius: 20px; font-family: monospace; }
+    .sidebar { background: var(--dark); min-height: 100vh; padding: 20px 0; }
+    .sidebar a { color: #cdd6f4; text-decoration: none; padding: 10px 20px;
+                 display: block; border-radius: 8px; margin: 2px 10px; }
+    .sidebar a:hover, .sidebar a.active { background: #1e3a5f; color: var(--accent); }
+    .sidebar .icon { width: 20px; text-align: center; margin-right: 8px; }
+    .stat-card { border-left: 4px solid var(--primary); }
+    .hash-text { font-family: monospace; font-size: .78rem; color: #555; }
+    .alert { border-radius: 10px; }
+    footer { background: var(--dark); color: #888; padding: 15px; text-align: center;
+             font-size: .85rem; margin-top: 40px; }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{ url_for('index') }}">
+      <i class="fas fa-dna me-2"></i>HealthChain AI
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon" style="filter:invert(1)"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto">
+        {% if session.get('username') %}
+          <li class="nav-item">
+            <span class="nav-link"><i class="fas fa-user-circle me-1"></i>
+              {{ session.username }} <span class="badge bg-info">{{ session.role }}</span></span>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('logout') }}">
+              <i class="fas fa-sign-out-alt"></i> Logout</a>
+          </li>
+        {% else %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- FLASH MESSAGES -->
+<div class="container mt-3">
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in msgs %}
+      <div class="alert alert-{{ cat }} alert-dismissible fade show">
+        {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endwith %}
+</div>
+
+<!-- MAIN -->
+{% if session.get('username') %}
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-2 sidebar d-none d-md-block">
+      <div class="text-center mb-4 mt-2">
+        <i class="fas fa-hospital-user fa-2x" style="color:#00d4ff"></i>
+        <p class="text-white mt-2 small">{{ session.username }}</p>
+      </div>
+      <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint=='dashboard' }}">
+        <i class="fas fa-th-large icon"></i> Dashboard</a>
+      <a href="{{ url_for('add_emr') }}" class="{{ 'active' if request.endpoint=='add_emr' }}">
+        <i class="fas fa-file-medical icon"></i> Add EMR</a>
+      <a href="{{ url_for('predict') }}" class="{{ 'active' if request.endpoint=='predict' }}">
+        <i class="fas fa-microscope icon"></i> AI Predict</a>
+      <a href="{{ url_for('blockchain_info') }}" class="{{ 'active' if request.endpoint=='blockchain_info' }}">
+        <i class="fas fa-cubes icon"></i> Blockchain</a>
+      {% if session.role == 'doctor' %}
+      <a href="{{ url_for('all_emrs') }}" class="{{ 'active' if request.endpoint=='all_emrs' }}">
+        <i class="fas fa-database icon"></i> All Records</a>
+      {% endif %}
+      <hr style="border-color:#1e3a5f; margin:15px">
+      <a href="{{ url_for('logout') }}">
+        <i class="fas fa-sign-out-alt icon"></i> Logout</a>
+    </div>
+
+    <!-- Content -->
+    <div class="col-md-10 py-4 px-4">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="container py-4">
+  {% block public_content %}{% endblock %}
+</div>
+{% endif %}
+
+<footer>
+  <i class="fas fa-shield-alt me-1"></i>
+  HealthChain AI – Intelligent Disease Prediction System using Deep Learning with Secure Blockchain Storage |
+  Achariya College of Engineering Technology, 2025
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

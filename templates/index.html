@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}HealthChain AI – Home{% endblock %}
+{% block extra_css %}
+<style>
+  .hero { background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 100%);
+          color: white; padding: 80px 0; text-align: center; }
+  .hero h1 { font-size: 2.8rem; font-weight: 800; }
+  .hero .accent { color: #00d4ff; }
+  .feature-icon { font-size: 2.5rem; margin-bottom: 15px; }
+  .tech-badge { background: #e8f4f8; border: 1px solid #b8dfe9;
+                border-radius: 20px; padding: 6px 16px;
+                font-size: .85rem; display: inline-block; margin: 4px; }
+</style>
+{% endblock %}
+{% block public_content %}
+<!-- Hero -->
+<div class="hero rounded-4 mb-5">
+  <h1><span class="accent">HealthChain</span> AI</h1>
+  <p class="lead mt-3" style="color:#a8b4cc">
+    Intelligent Disease Prediction System using<br>
+    <strong>Deep Learning</strong> with <strong>Secure Blockchain Storage</strong>
+  </p>
+  <div class="mt-4">
+    <a href="{{ url_for('register') }}" class="btn btn-info btn-lg me-3 px-5">Get Started</a>
+    <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-5">Login</a>
+  </div>
+  <div class="mt-4">
+    <span class="tech-badge" style="background:#1e3a5f;color:#00d4ff;border-color:#00d4ff">
+      <i class="fas fa-cube me-1"></i>Ethereum Blockchain</span>
+    <span class="tech-badge" style="background:#1e3a5f;color:#00d4ff;border-color:#00d4ff">
+      <i class="fas fa-network-wired me-1"></i>IPFS Storage</span>
+    <span class="tech-badge" style="background:#1e3a5f;color:#00d4ff;border-color:#00d4ff">
+      <i class="fas fa-brain me-1"></i>EfficientNetB0</span>
+    <span class="tech-badge" style="background:#1e3a5f;color:#00d4ff;border-color:#00d4ff">
+      <i class="fas fa-lock me-1"></i>CryptoChaos Encryption</span>
+  </div>
+</div>
+
+<!-- Features -->
+<div class="row g-4 mb-5">
+  <div class="col-md-3">
+    <div class="card h-100 text-center p-4">
+      <div class="feature-icon text-primary">🔗</div>
+      <h5>Blockchain Security</h5>
+      <p class="text-muted small">Ethereum smart contracts ensure EMRs are tamper-proof and traceable.</p>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card h-100 text-center p-4">
+      <div class="feature-icon text-success">🌐</div>
+      <h5>IPFS Storage</h5>
+      <p class="text-muted small">Decentralized storage via IPFS eliminates single points of failure.</p>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card h-100 text-center p-4">
+      <div class="feature-icon text-warning">🔐</div>
+      <h5>CryptoChaos</h5>
+      <p class="text-muted small">Chaotic key generation provides exceptional resistance to attacks.</p>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card h-100 text-center p-4">
+      <div class="feature-icon text-danger">🤖</div>
+      <h5>AI Diagnosis</h5>
+      <p class="text-muted small">EfficientNetB0 deep learning model predicts skin diseases from images.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Project Info -->
+<div class="card p-4">
+  <div class="row align-items-center">
+    <div class="col-md-8">
+      <h5 class="fw-bold">About the Project</h5>
+      <p class="text-muted">
+        Final Year B.Tech Project – Achariya College of Engineering Technology,
+        Pondicherry University (2025–2026). This system integrates Ethereum blockchain,
+        CryptoChaos encryption, IPFS, and EfficientNetB0 deep learning for
+        secure, intelligent healthcare management.
+      </p>
+      <p class="mb-0 small text-muted">
+        <strong>Team:</strong> Jancirani D · Karthiga V · Madhumitha S · Shakira Banu I<br>
+        <strong>Guide:</strong> Mrs. Jansi S, M.E., Assistant Professor, Dept. of CSE
+      </p>
+    </div>
+    <div class="col-md-4 text-center">
+      <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg w-100">
+        <i class="fas fa-rocket me-2"></i>Launch System
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

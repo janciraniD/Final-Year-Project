@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Blockchain Explorer – HealthChain AI{% endblock %}
+{% block content %}
+<h4 class="fw-bold mb-4">
+  <i class="fas fa-cubes me-2 text-info"></i>Blockchain Explorer
+</h4>
+<div class="row g-4">
+  <div class="col-12">
+    <div class="card" style="background:#0a1628;color:white">
+      <div class="card-header text-info fw-bold" style="background:#1e3a5f">
+        <i class="fas fa-link me-2"></i>Ethereum Blockchain – Blocks
+      </div>
+      <div class="card-body p-0" style="max-height:500px;overflow-y:auto">
+        {% if chain_data %}
+          {% for block in chain_data|reverse %}
+          <div class="p-3 border-bottom" style="border-color:#1e3a5f !important">
+            <div class="row align-items-center">
+              <div class="col-md-1 text-center">
+                <span class="badge bg-info fs-6">#{{ block.index }}</span>
+              </div>
+              <div class="col-md-5">
+                <small class="text-secondary">Block Hash</small>
+                <p class="hash-text mb-0" style="color:#cdd6f4">{{ block.hash }}</p>
+              </div>
+              <div class="col-md-3">
+                <small class="text-secondary">Previous Hash</small>
+                <p class="hash-text mb-0" style="color:#888">{{ block.previous_hash[:30] }}...</p>
+              </div>
+              <div class="col-md-3">
+                <small class="text-secondary">Timestamp</small>
+                <p class="mb-0 small" style="color:#cdd6f4">{{ block.timestamp[:16] }}</p>
+                <span class="badge bg-secondary">{{ block.transactions|length }} TX</span>
+              </div>
+            </div>
+            {% for tx in block.transactions %}
+            <div class="mt-2 p-2 rounded" style="background:#1e3a5f;font-size:.8rem">
+              <span class="badge bg-warning me-2">{{ tx.type }}</span>
+              <span class="text-info">TX: {{ tx.tx_hash[:30] if tx.tx_hash else 'N/A' }}...</span>
+              {% if tx.patient_name %} | Patient: <strong>{{ tx.patient_name }}</strong>{% endif %}
+              {% if tx.disease %} | Disease: <strong>{{ tx.disease }}</strong>{% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-center text-muted p-4">No blocks yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Verify TX -->
+<div class="card mt-4 p-4">
+  <h6 class="fw-bold mb-3"><i class="fas fa-search me-2"></i>Verify Transaction</h6>
+  <div class="input-group">
+    <input type="text" id="verify-input" class="form-control" placeholder="Enter transaction hash..."/>
+    <button class="btn btn-primary" onclick="verifyTx()">Verify</button>
+  </div>
+  <div id="verify-result" class="mt-3"></div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+async function verifyTx() {
+  const hash = document.getElementById('verify-input').value.trim();
+  if (!hash) return;
+  const res  = await fetch(`/blockchain/verify/${hash}`);
+  const data = await res.json();
+  const box  = document.getElementById('verify-result');
+  if (data.valid) {
+    box.innerHTML = `<div class="alert alert-success">
+      ✓ Valid | Block #${data.block_index} | ${data.timestamp}</div>`;
+  } else {
+    box.innerHTML = `<div class="alert alert-warning">Transaction not found in local chain.</div>`;
+  }
+}
+</script>
+{% endblock %}
